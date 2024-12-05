@@ -220,6 +220,22 @@ __PACKAGE__->register_method ({
 		$rpcenv->check_user_enabled($username);
 	    }
 
+		if ($config->{'enable-assign'}) {
+			PVE::AccessControl::lock_user_config(sub {
+				my $usercfg = cfs_read_file("user.cfg");
+				PVE::AccessControl::delete_user_group($username, $usercfg);
+				my $roles = $info->{$config->{'roles-attrname'}};
+
+				foreach my $group (@$roles) {
+					if ($usercfg->{groups}->{$group}) {
+						PVE::AccessControl::add_user_group($username, $usercfg, $group);
+					}
+				}
+				
+				cfs_write_file("user.cfg", $usercfg);
+			}, "update openid user group");
+		}
+
 	    my $ticket = PVE::AccessControl::assemble_ticket($username);
 	    my $csrftoken = PVE::AccessControl::assemble_csrf_prevention_token($username);
 	    my $cap = $rpcenv->compute_api_permission($username);

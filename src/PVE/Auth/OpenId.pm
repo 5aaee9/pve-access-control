@@ -63,6 +63,18 @@ sub properties {
 	    pattern => '^[^\x00-\x1F\x7F <>#"]*$', # Prohibit characters not allowed in URI RFC 2396.
 	    optional => 1,
 	},
+	"enable-assign" => {
+	    description => "Automatically assign user roles.",
+	    optional => 1,
+	    type => 'boolean',
+	    default => 0,
+	},
+	"roles-attrname" => {
+	    description => "User permission role name",
+	    type => 'string',
+	    optional => 1,
+	    default => "roles",
+	},
    };
 }
 
@@ -78,6 +90,8 @@ sub options {
 	"acr-values" => { optional => 1 },
 	default => { optional => 1 },
 	comment => { optional => 1 },
+	"enable-assign" => { optional => 1 },
+	"roles-attrname" => { optional => 1 },
     };
 }
 
