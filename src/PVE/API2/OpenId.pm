@@ -3,6 +3,7 @@ package PVE::API2::OpenId;
 use strict;
 use warnings;
 
+use JSON qw(decode_json encode_json);
 use PVE::Tools qw(extract_param);
 use PVE::RS::OpenId;
 
@@ -172,7 +173,7 @@ __PACKAGE__->register_method ({
 
 	    my $info = $openid->verify_authorization_code($param->{code}, $private_auth_state);
 	    my $subject = $info->{'sub'};
-
+		
 	    my $unique_name;
 
 	    my $user_attr = $config->{'username-claim'} // 'sub';
@@ -219,6 +220,23 @@ __PACKAGE__->register_method ({
 		# test if user exists and is enabled
 		$rpcenv->check_user_enabled($username);
 	    }
+
+		if ($config->{'enable-assign'}) {
+			my $user_has_role = ($config->{'required-roles'} ~~ $info->{$config->{'roles-attrname'}});
+
+			if ($user_has_role) {
+				my $group = $config->{'assign-group'};
+				PVE::AccessControl::lock_user_config(sub {
+		    		my $usercfg = cfs_read_file("user.cfg");
+					if ($usercfg->{groups}->{$group}) {
+						PVE::AccessControl::add_user_group($username, $usercfg, $group);
+					} else {
+						die "no such group '$group'\n";
+					}
+		    		cfs_write_file("user.cfg", $usercfg);
+				}, "update openid user group");
+			}
+		}
 
 	    my $ticket = PVE::AccessControl::assemble_ticket($username);
 	    my $csrftoken = PVE::AccessControl::assemble_csrf_prevention_token($username);

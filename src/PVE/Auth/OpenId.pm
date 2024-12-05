@@ -63,6 +63,28 @@ sub properties {
 	    pattern => '^[^\x00-\x1F\x7F <>#"]*$', # Prohibit characters not allowed in URI RFC 2396.
 	    optional => 1,
 	},
+	"enable-assign" => {
+	    description => "Automatically assign user roles.",
+	    optional => 1,
+	    type => 'boolean',
+	    default => 0,
+	},
+	"required-roles" => {
+	    description => "User roles when OpenID authenticated",
+	    type => 'string',
+	    optional => 1,
+	},
+	"roles-attrname" => {
+	    description => "User permission role name",
+	    type => 'string',
+	    optional => 1,
+	    default => "roles",
+	},
+	"assign-group" => {
+	    description => "User been assigned role when has role on OpenID",
+	    type => 'string',
+	    optional => 1,
+	},
    };
 }
 
@@ -78,6 +100,10 @@ sub options {
 	"acr-values" => { optional => 1 },
 	default => { optional => 1 },
 	comment => { optional => 1 },
+	"enable-assign" => { optional => 1 },
+	"required-roles" => { optional => 1 },
+	"assign-group" => { optional => 1 },
+    "roles-attrname" => { optional => 1 },
     };
 }
 
